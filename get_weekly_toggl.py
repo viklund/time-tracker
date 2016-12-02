@@ -71,6 +71,8 @@ def check_week_of(day):
 
     sums = {}
     for entry in data:
+        if entry['duration'] == 0:
+            continue
         if entry.has_key('pid'):
             project = get_project_info(entry['pid'])
             desc = "%s:%s:%s" % ( project['client'], project['name'], entry['description'] )
@@ -92,7 +94,7 @@ def friday_of(dt):
 
 if __name__ == '__main__':
     big_info = []
-    for delta in [1, 2,3,4,5,6,7,8,9,10]:
+    for delta in [0,1]:
         now = datetime.datetime.now(TZ()) - datetime.timedelta(days=7*delta)
 
         hours = check_week_of(now)
