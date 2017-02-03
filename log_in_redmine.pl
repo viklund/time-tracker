@@ -18,13 +18,26 @@ GetOptions(
 my $file = shift // die "Need input file\n";
 my $json = from_json(slurp($file));
 
+if ( ref($json) ne "ARRAY" ) {
+    $json = [ $json ];
+}
+
 my $apikey = get_apikey();
 my $redmine_url = 'https://projects.bils.se';
-
-my $issue_lookup = get_all_issues();
+my $rmclient = 'rmclient.git/bin/rmclient';
 
 
 my %issue_of = (
+    'BILS'          => 3499,
+    'Elixir'        => 3499, ## Should probably change this
+    'AZ Database'   => 3486,
+    'swefreq'       => 2990,
+    'LocalEGA'      => 3534,
+    'Elixir-Beacon' => 3585,
+    'PythonVt17'    => 3322,
+);
+
+my %issue_of_old = (
     'BILS:Admin:Admin'                       => [3499, 'Administration'],
     'BILS:Admin'                             => [3499, 'Administration'],
     'BILS:Admin:SysDev meeting'              => [3499, 'Administration'],
@@ -104,7 +117,7 @@ for my $week (@$json) {
 
         my $comment = (split /:/, $entry)[2];
 
-        my $issue_title = $issue_lookup->{$issue};
+        my $issue_title = issue_lookup($issue);
         if ( ! $issue_title ) {
             say STDERR "WARNING: Can't find title of $issue";
             $issue_title = "N/A ($issue)" . ' 'x30;
@@ -125,6 +138,7 @@ for my $week (@$json) {
     }
 }
 
+
 #exit if $error;
 
 @ok_entries = sort { $a->{issue} <=> $b->{issue} ||
@@ -133,7 +147,7 @@ for my $week (@$json) {
 
 for my $entry ( @ok_entries ) {
     my $comment = $entry->{comment};
-    my @command = ('rmclient',
+    my @command = ($rmclient,
         '--url'      => $redmine_url,
         '--apikey'   => $apikey,
         '--date'     => $entry->{dt},
@@ -145,10 +159,10 @@ for my $entry ( @ok_entries ) {
 
     $tot_time += $entry->{time};
 
-    printf "%-5d Logging %5.2fh of %40.40s as <%20s> (%2d) on <%30.30s>\n",
+    printf "%-5d Logging %5.2fh of %40.40s as <%20s> (%2d) on <%30.30s> (\"%s\")\n",
         $entry->{issue}, $entry->{time}, $entry->{entry},
         $entry->{activity_text}, $entry->{activity},
-        $entry->{title};
+        $entry->{title}, $entry->{comment};
 
     if ( $insert ) {
         say "Running @command";
@@ -181,18 +195,15 @@ sub run_rmclient_insert {
 
 sub get_issue_of {
     my $entry = shift;
-    my @parts = split /:/, $entry;
-    for my $l (2,1,0) {
-        my $entry = join ':', @parts[0..$l];
-        if (exists $issue_of{ $entry } ) {
-            my ($issue, $activity) = @{ $issue_of{$entry} };
-            if ( ! exists $activity_id_of{ $activity } ) {
-                warn "Can't find activity id for <$activity>\n";
-                return;
-            }
-
-            return ($issue, $activity_id_of{ $activity });
+    my ($task, $activity) = split /:/, $entry;
+    if (exists $issue_of{ $task } ) {
+        my $issue = $issue_of{$task};
+        if ( ! exists $activity_id_of{ $activity } ) {
+            warn "Can't find activity id for <$activity>\n";
+            return;
         }
+
+        return ($issue, $activity_id_of{ $activity });
     }
     warn "Can't find an entry for $entry\n";
     return;
@@ -219,7 +230,7 @@ sub logger {
 }
 
 sub get_all_issues {
-    open my $CLIENT, '-|', "rmclient --url $redmine_url --apikey $apikey -qi"
+    open my $CLIENT, '-|', "$rmclient --url $redmine_url --apikey $apikey -qi"
         or die "Can't get issues";
     my %info;
     while (<$CLIENT>) {
@@ -228,8 +239,31 @@ sub get_all_issues {
         $info{$id} = $text;
     }
 
-    # Add extra entries here
-    $info{2990} //= "Systems development SweFreq";
-
     return \%info;
+}
+
+sub _get_specific_issue {
+    my $issue = shift;
+    open my $CLIENT, '-|', "$rmclient --url $redmine_url --apikey $apikey -qi$issue 2>/dev/null"
+        or die "Can't get issues";
+    my $text;
+    while (<$CLIENT>) {
+        chomp;
+        ($text) = /^\d+\s+(.*)$/;
+    }
+
+    return $text;
+}
+
+my $issue_lookup = get_all_issues();
+sub issue_lookup {
+    my $issue = shift;
+    if ( ! exists $issue_lookup->{$issue} ) {
+        my $text = _get_specific_issue( $issue );
+        if ( ! $text ) {
+            die "Can't find issue $issue!";
+        }
+        $issue_lookup->{$issue} = $text;
+    }
+    return $issue_lookup->{$issue};
 }
