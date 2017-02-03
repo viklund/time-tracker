@@ -4,6 +4,7 @@ import urllib2
 import base64
 import sys
 import datetime
+from os.path import isfile
 
 toggl_username = json.load(open('secrets.json'))['toggl']
 
@@ -21,9 +22,9 @@ def get_response(url):
     try:
         res = urllib2.urlopen(request)
         data = json.load(res)
-    except IOError, e:
-        print "OOps, something went wrong"
-        print e
+    except IOError as e:
+        print("OOps, something went wrong")
+        print(e)
         sys.exit(1)
 
     return data
@@ -87,25 +88,37 @@ def check_week_of(day):
     return sums
 
 def dump(data):
-    print json.dumps(data, sort_keys=True, indent=4,
-            separators=(',',': '))
+    print(json.dumps(data, sort_keys=True, indent=4,
+            separators=(',',': ')))
+
+def dump_file(data, file):
+    with open(file, 'w') as out:
+        json.dump(data, out, sort_keys=True, indent=4, separators=(',',': '))
 
 def friday_of(dt):
     return dt + datetime.timedelta(days=(4 - dt.weekday()))
 
 if __name__ == '__main__':
-    big_info = []
-    for delta in [0,1]:
-        now = datetime.datetime.now(TZ()) - datetime.timedelta(days=7*delta)
+    now = datetime.datetime.now(TZ())
+    for delta in [1,2,3]:
+        check_time = now - datetime.timedelta(days=7*delta)
+        friday = friday_of(check_time).strftime("%Y-%m-%d")
 
-        hours = check_week_of(now)
+        outfile = 'json/info_{}.json'.format(friday)
+
+        if isfile(outfile):
+            print "We already have checked {}, skipping".format(friday)
+            continue
+
+        print "Processing {}".format(friday)
+
+        hours = check_week_of(check_time)
         sum = 0
         for hour in hours.values():
             sum += hour
         info = {
-            "week": friday_of(now).strftime("%Y-%m-%d"),
+            "week": friday,
             "sum": sum,
             "work": hours,
         }
-        big_info.append(info)
-    dump(big_info)
+        dump_file(info, outfile)
