@@ -1,0 +1,4 @@
+[submodule "rmclient.git"]
+	path = rmclient.git
+	url = git@github.com:NBISweden/rmclient.git
+	branch = feature/get-specific-issue
