@@ -35,6 +35,8 @@ my %issue_of = (
     'LocalEGA'      => 3534,
     'Elixir-Beacon' => 3585,
     'PythonVt17'    => 3322,
+    'Tryggve'       => 1707,
+    'StructVar'     => 3131,
 );
 
 my %issue_of_old = (
