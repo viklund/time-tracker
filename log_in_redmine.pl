@@ -39,54 +39,6 @@ my %issue_of = (
     'StructVar'     => 3131,
 );
 
-my %issue_of_old = (
-    'BILS:Admin:Admin'                       => [3499, 'Administration'],
-    'BILS:Admin'                             => [3499, 'Administration'],
-    'BILS:Admin:SysDev meeting'              => [3499, 'Administration'],
-    'NBIS:Admin:SickChild'                   => [3499, 'Absence'],
-    'BILS:Admin:Leave'                       => [3499, 'Absence'],
-    'None:None:Gitbulance'                   => [3499, 'Administration'],
-    'NBIS:Admin:Retreat'                     => [3499, 'Administration'],
-    'BILS:Own Education'                     => [3499, 'Own Training'],
-    'Bils:Admin'                             => [3499, 'Administration'],
-
-    'BILS:Admin:Bioinfo support'             => [3502, 'Support'],
-    'BILS:Admin:Bioinfo support, local'      => [3502, 'Support'],
-
-    'BILS:AstraZeneca DB:Background reading' => [3486, 'Administration'],
-    'BILS:AstraZeneca DB:Meeting'            => [3486, 'Administration'],
-    'BILS:AstraZeneca DB:Schema design'      => [3486, 'Development'],
-
-    'BILS:Beacon'                            => [2990, 'Development'],
-    'BILS:Beacon:Beacon'                     => [2990, 'Development'],
-    'BILS:Beacon:Meeting'                    => [2990, 'Administration'],
-
-    'BILS:Mosler:R on Mosler'                => [2403, 'Development'],
-
-    'BILS:Tryggve:Fred Bollplank'            => [1707, 'Administration'],
-    'BILS:Tryggve:Meeting'                   => [1707, 'Administration'],
-    'BILS:Tryggve:Tryggve'                   => [1707, 'Administration'],
-    'BILS:Tryggve'                           => [1707, 'Administration'],
-    'BILS:Tryggve:Sftp squid'                => [2489, 'Development'],
-    'Tryggve:SFTP'                           => [2489, 'Development'],
-
-    'BILS:WGS-Structvar'                     => [3131, 'Development'],
-
-    'NBIS:LocalEGA:LocalEGA'                 => [3534, 'Development'],
-    'NBIS:LocalEGA'                          => [3534, 'Administration'],
-    'None:None:EGA'                          => [3534, 'Development'],
-    'None:None:LocalEGA'                     => [3534, 'Administration'],
-
-    'None:None:R-course'                     => [3365, 'Teaching'],
-    'None:None:Teaching NGS-Course'          => [3325, 'Teaching'],
-    'NBIS:R-course-2015'                     => [3365, 'Teaching'],
-
-    "Elixir-Beacon:Admin"                    => [3585, 'Admin'],
-
-    'None:None:Git course'                   => [3542, 'Teaching'],
-    'BILS:Git course'                        => [3542, 'Teaching'],
-);
-
 my %activity_id_of = (
     Design                  =>  8,
     Development             =>  9,
