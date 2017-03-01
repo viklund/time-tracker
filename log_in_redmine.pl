@@ -26,18 +26,7 @@ my $apikey = get_apikey();
 my $redmine_url = 'https://projects.bils.se';
 my $rmclient = 'rmclient.git/bin/rmclient';
 
-
-my %issue_of = (
-    'BILS'          => 3499,
-    'Elixir'        => 3499, ## Should probably change this
-    'AZ Database'   => 3486,
-    'swefreq'       => 2990,
-    'LocalEGA'      => 3534,
-    'Elixir-Beacon' => 3585,
-    'PythonVt17'    => 3322,
-    'Tryggve'       => 1707,
-    'StructVar'     => 3131,
-);
+my %issue_of = %{ load_issue_map() };
 
 my %activity_id_of = (
     Design                  =>  8,
@@ -174,6 +163,11 @@ sub slurp {
 sub get_apikey {
     my $json = from_json(slurp('secrets.json'));
     return $json->{'redmine'};
+}
+
+sub load_issue_map {
+    my $json = from_json(slurp('issue_map.json'));
+    return $json;
 }
 
 sub logger {
