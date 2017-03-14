@@ -141,7 +141,9 @@ sub run_rmclient_insert {
 
 sub get_issue_of {
     my $entry = shift;
-    my ($task, $activity) = split /:/, $entry;
+    # my structure has a 4th element that contains the tag content 
+    # from Toggl 
+    my ($proj, $task, $activity, $tag) = split /:/, $entry;    
     if (exists $issue_of{ $task } ) {
         my $issue = $issue_of{$task};
         if ( ! exists $activity_id_of{ $activity } ) {
