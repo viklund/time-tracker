@@ -58,7 +58,10 @@ for my $week (@$json) {
             next;
         }
 
-        my $comment = (split /:/, $entry)[2];
+        # my structure has a 4th element that contains the tag content 
+        # from Toggl 
+        my $comment = (split /:/, $entry)[3];
+        if ($comment eq 'None') { $comment = ''; }
 
         my $issue_title = issue_lookup($issue);
         if ( ! $issue_title ) {
