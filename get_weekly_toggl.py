@@ -56,30 +56,55 @@ def get_project_info(pid):
 
 
 def check_week_of(day):
+    # myformat = '%Y-%m-%d'
+    # print 'day: ' + day.strftime(myformat)
+    # print 'days: ' + str(day.weekday())
+    
     monday = day - datetime.timedelta(
                 days=day.weekday(),
                 microseconds=day.microsecond,
                 hours=day.hour)
     friday = monday + datetime.timedelta(
-            days = 6)
+            days = 4)
 
     url = "https://www.toggl.com/api/v8/time_entries?start_date=%s&end_date=%s" % (
             urllib2.quote(monday.isoformat()),
             urllib2.quote(friday.isoformat()))
 
+    # saturday = day - datetime.timedelta(
+    #             days=day.weekday() + 2, # + 2 # is this the place to add two days to get to saturday
+    #             microseconds=day.microsecond,
+    #             hours=day.hour)
+    # # print 'saturday: ' + saturday.strftime(myformat)
+    # friday = saturday + datetime.timedelta(
+    #         days = 6)
+    # # print 'friday: ' + friday.strftime(myformat)
+    # url = "https://www.toggl.com/api/v8/time_entries?start_date=%s&end_date=%s" % (
+    #         urllib2.quote(saturday.isoformat()),
+    #         urllib2.quote(friday.isoformat()))
+    # 
+    # print url
     data = get_response(url)
 
     #dump(data)
 
+    ## Prev data structure
+    ## sums["client:projname:entry descr"] = total time
+    ## 
+    ## New:
+    ## sums["client:projname:entry descr:tag"] = total time
     sums = {}
     for entry in data:
         if entry['duration'] == 0:
             continue
+        tag = 'None'
+        if entry.has_key('tags'):
+            tag = ' / '.join(entry['tags'])
         if entry.has_key('pid'):
             project = get_project_info(entry['pid'])
-            desc = "%s:%s:%s" % ( project['client'], project['name'], entry['description'] )
+            desc = "%s:%s:%s:%s" % ( project['client'], project['name'], entry['description'], tag ) # Add tag in my new structure
         else:
-            desc = "None:None:%s" % ( entry['description'] )
+            desc = "None:None:%s:%s" % ( entry['description'], tag ) # Add tag in my new structure
         if not sums.has_key(desc):
             sums[desc] = 0.0
         if entry['duration'] > 0:
