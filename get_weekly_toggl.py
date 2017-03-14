@@ -60,29 +60,27 @@ def check_week_of(day):
     # print 'day: ' + day.strftime(myformat)
     # print 'days: ' + str(day.weekday())
     
-    monday = day - datetime.timedelta(
-                days=day.weekday(),
-                microseconds=day.microsecond,
-                hours=day.hour)
-    friday = monday + datetime.timedelta(
-            days = 4)
-
-    url = "https://www.toggl.com/api/v8/time_entries?start_date=%s&end_date=%s" % (
-            urllib2.quote(monday.isoformat()),
-            urllib2.quote(friday.isoformat()))
-
-    # saturday = day - datetime.timedelta(
-    #             days=day.weekday() + 2, # + 2 # is this the place to add two days to get to saturday
+    # monday = day - datetime.timedelta(
+    #             days=day.weekday(),
     #             microseconds=day.microsecond,
     #             hours=day.hour)
-    # # print 'saturday: ' + saturday.strftime(myformat)
-    # friday = saturday + datetime.timedelta(
-    #         days = 6)
-    # # print 'friday: ' + friday.strftime(myformat)
-    # url = "https://www.toggl.com/api/v8/time_entries?start_date=%s&end_date=%s" % (
-    #         urllib2.quote(saturday.isoformat()),
-    #         urllib2.quote(friday.isoformat()))
+    # friday = monday + datetime.timedelta(
+    #         days = 4)
     # 
+    # url = "https://www.toggl.com/api/v8/time_entries?start_date=%s&end_date=%s" % (
+    #         urllib2.quote(monday.isoformat()),
+    #         urllib2.quote(friday.isoformat()))
+
+    saturday = day - datetime.timedelta(
+                days=day.weekday() + 2, # + 2 # is this the place to add two days to get to saturday?
+                microseconds=day.microsecond,
+                hours=day.hour)
+    friday = saturday + datetime.timedelta(
+            days = 6)
+    url = "https://www.toggl.com/api/v8/time_entries?start_date=%s&end_date=%s" % (
+            urllib2.quote(saturday.isoformat()),
+            urllib2.quote(friday.isoformat()))
+    
     # print url
     data = get_response(url)
 
