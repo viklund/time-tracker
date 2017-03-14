@@ -100,7 +100,7 @@ def friday_of(dt):
 
 if __name__ == '__main__':
     now = datetime.datetime.now(TZ())
-    for delta in [1,2,3]:
+    for delta in [0,1,2,3]:
         check_time = now - datetime.timedelta(days=7*delta)
         friday = friday_of(check_time).strftime("%Y-%m-%d")
 
