@@ -22,11 +22,14 @@ if ( ref($json) ne "ARRAY" ) {
     $json = [ $json ];
 }
 
-my $apikey = get_apikey();
+my $config = load_config();
+
+my $apikey = $config->{'secrets'}{'redmine'};
 my $redmine_url = 'https://projects.bils.se';
 my $rmclient = 'rmclient.git/bin/rmclient';
 
-my %issue_of = %{ load_issue_map() };
+my %issue_of = %{ $config->{issue_map} };
+my %entry_mapping = %{ $config->{entry_map} };
 
 my %activity_id_of = (
     Design                  =>  8,
@@ -58,7 +61,8 @@ for my $week (@$json) {
             next;
         }
 
-        my $comment = (split /:/, $entry)[2];
+        my $comment = (split /:/, $entry)[$entry_mapping{comment}];
+        if ($comment eq 'None') { $comment = ''; }
 
         my $issue_title = issue_lookup($issue);
         if ( ! $issue_title ) {
@@ -133,12 +137,13 @@ sub run_rmclient_insert {
     close($CMD);
     return $exitcode;
 }
-        
 
 
 sub get_issue_of {
     my $entry = shift;
-    my ($task, $activity) = split /:/, $entry;
+    my @entry = split /:/, $entry;
+    my ($task, $activity) = @entry[ @entry_mapping{qw/ task activity /} ];
+
     if (exists $issue_of{ $task } ) {
         my $issue = $issue_of{$task};
         if ( ! exists $activity_id_of{ $activity } ) {
@@ -160,14 +165,24 @@ sub slurp {
     return $data;
 }
 
+sub load_config {
+    my $json = from_json(slurp('config.json'));
+    return $json;
+}
+
 sub get_apikey {
-    my $json = from_json(slurp('secrets.json'));
-    return $json->{'redmine'};
+    my $config = shift;
+    return $config->{'secrets'}{'redmine'};
+}
+
+sub load_entry_map {
+    my $config = shift;
+    return $config->{'entry_map'};
 }
 
 sub load_issue_map {
-    my $json = from_json(slurp('issue_map.json'));
-    return $json;
+    my $config = shift;
+    return $config->{'issue_map'};
 }
 
 sub logger {
@@ -203,9 +218,12 @@ sub _get_specific_issue {
     return $text;
 }
 
-my $issue_lookup = get_all_issues();
+my $issue_lookup;
 sub issue_lookup {
     my $issue = shift;
+    if (! ref $issue_lookup) {
+        $issue_lookup = get_all_issues();
+    }
     if ( ! exists $issue_lookup->{$issue} ) {
         my $text = _get_specific_issue( $issue );
         if ( ! $text ) {

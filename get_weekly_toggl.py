@@ -5,8 +5,9 @@ import base64
 import sys
 import datetime
 from os.path import isfile
+import argparse
 
-toggl_username = json.load(open('secrets.json'))['toggl']
+toggl_username = json.load(open('config.json'))['secrets']['toggl']
 
 class TZ(datetime.tzinfo):
     def utcoffset(self, dt): return datetime.timedelta(hours=0)
@@ -56,30 +57,31 @@ def get_project_info(pid):
 
 
 def check_week_of(day):
-    monday = day - datetime.timedelta(
-                days=day.weekday(),
+    saturday = day - datetime.timedelta(
+                days=day.weekday() + 2, # Saturday
                 microseconds=day.microsecond,
                 hours=day.hour)
-    friday = monday + datetime.timedelta(
+    friday = saturday + datetime.timedelta(
             days = 6)
-
     url = "https://www.toggl.com/api/v8/time_entries?start_date=%s&end_date=%s" % (
-            urllib2.quote(monday.isoformat()),
+            urllib2.quote(saturday.isoformat()),
             urllib2.quote(friday.isoformat()))
 
     data = get_response(url)
 
-    #dump(data)
-
+    ## sums["client:projname:entry descr:tag"] = total time
     sums = {}
     for entry in data:
         if entry['duration'] == 0:
             continue
+        tag = 'None'
+        if entry.has_key('tags'):
+            tag = ' / '.join(entry['tags'])
         if entry.has_key('pid'):
             project = get_project_info(entry['pid'])
-            desc = "%s:%s:%s" % ( project['client'], project['name'], entry['description'] )
+            desc = "%s:%s:%s:%s" % ( project['client'], project['name'], entry.get('description', ""), tag )
         else:
-            desc = "None:None:%s" % ( entry['description'] )
+            desc = "None:None:%s:%s" % ( entry.get('description',""), tag )
         if not sums.has_key(desc):
             sums[desc] = 0.0
         if entry['duration'] > 0:
@@ -99,8 +101,16 @@ def friday_of(dt):
     return dt + datetime.timedelta(days=(4 - dt.weekday()))
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Retrieve data from toggl')
+    parser.add_argument('--from', type=int, dest='frm', action='store', required=True, metavar='FROM',
+            help='Delta week to start from (0 is current week)')
+    parser.add_argument('--to', type=int, required=True,
+            help='Delta week to go until')
+
+    args = parser.parse_args()
+
     now = datetime.datetime.now(TZ())
-    for delta in [1,2,3]:
+    for delta in range(args.frm, args.to+1):
         check_time = now - datetime.timedelta(days=7*delta)
         friday = friday_of(check_time).strftime("%Y-%m-%d")
 

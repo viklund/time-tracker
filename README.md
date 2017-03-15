@@ -1,4 +1,4 @@
-Two files need to be created, `secrets.json` and `issue_map.json`.
+One files need to be created: `config.json`.
 
-Sample files exist with the `_sample` name, update them and save with out the
-`_sample` suffix. They are in json format.
+A sample files exist with the `config_sample.json` name, update them and save
+without the `_sample` suffix.
