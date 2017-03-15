@@ -27,6 +27,7 @@ my $redmine_url = 'https://projects.bils.se';
 my $rmclient = 'rmclient.git/bin/rmclient';
 
 my %issue_of = %{ load_issue_map() };
+my %entry_mapping = %{ load_entry_mapping() };
 
 my %activity_id_of = (
     Design                  =>  8,
@@ -58,7 +59,7 @@ for my $week (@$json) {
             next;
         }
 
-        my $comment = (split /:/, $entry)[3];
+        my $comment = (split /:/, $entry)[$entry_mapping{comment}];
         if ($comment eq 'None') { $comment = ''; }
 
         my $issue_title = issue_lookup($issue);
@@ -138,8 +139,9 @@ sub run_rmclient_insert {
 
 sub get_issue_of {
     my $entry = shift;
+    my @entry = split /:/, $entry;
+    my ($task, $activity) = @entry[ @entry_mapping{qw/ task activity /} ];
 
-    my ($proj, $task, $activity, $tag) = split /:/, $entry;
     if (exists $issue_of{ $task } ) {
         my $issue = $issue_of{$task};
         if ( ! exists $activity_id_of{ $activity } ) {
@@ -164,6 +166,11 @@ sub slurp {
 sub get_apikey {
     my $json = from_json(slurp('secrets.json'));
     return $json->{'redmine'};
+}
+
+sub load_entry_mapping {
+    my $json = from_json(slurp('entry_map.json'));
+    return $json;
 }
 
 sub load_issue_map {
@@ -204,9 +211,12 @@ sub _get_specific_issue {
     return $text;
 }
 
-my $issue_lookup = get_all_issues();
+my $issue_lookup;
 sub issue_lookup {
     my $issue = shift;
+    if (! ref $issue_lookup) {
+        $issue_lookup = get_all_issues();
+    }
     if ( ! exists $issue_lookup->{$issue} ) {
         my $text = _get_specific_issue( $issue );
         if ( ! $text ) {

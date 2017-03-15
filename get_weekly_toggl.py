@@ -78,9 +78,9 @@ def check_week_of(day):
             tag = ' / '.join(entry['tags'])
         if entry.has_key('pid'):
             project = get_project_info(entry['pid'])
-            desc = "%s:%s:%s:%s" % ( project['client'], project['name'], entry['description'], tag ) # Add tag in my new structure
+            desc = "%s:%s:%s:%s" % ( project['client'], project['name'], entry.get('description', ""), tag )
         else:
-            desc = "None:None:%s:%s" % ( entry['description'], tag ) # Add tag in my new structure
+            desc = "None:None:%s:%s" % ( entry.get('description',""), tag )
         if not sums.has_key(desc):
             sums[desc] = 0.0
         if entry['duration'] > 0:
