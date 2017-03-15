@@ -6,7 +6,7 @@ import sys
 import datetime
 from os.path import isfile
 
-toggl_username = json.load(open('secrets.json'))['toggl']
+toggl_username = json.load(open('config.json'))['secrets']['toggl']
 
 class TZ(datetime.tzinfo):
     def utcoffset(self, dt): return datetime.timedelta(hours=0)

@@ -22,12 +22,14 @@ if ( ref($json) ne "ARRAY" ) {
     $json = [ $json ];
 }
 
-my $apikey = get_apikey();
+my $config = load_config();
+
+my $apikey = $config->{'secrets'}{'redmine'};
 my $redmine_url = 'https://projects.bils.se';
 my $rmclient = 'rmclient.git/bin/rmclient';
 
-my %issue_of = %{ load_issue_map() };
-my %entry_mapping = %{ load_entry_mapping() };
+my %issue_of = %{ $config->{issue_map} };
+my %entry_mapping = %{ $config->{entry_map} };
 
 my %activity_id_of = (
     Design                  =>  8,
@@ -163,19 +165,24 @@ sub slurp {
     return $data;
 }
 
-sub get_apikey {
-    my $json = from_json(slurp('secrets.json'));
-    return $json->{'redmine'};
+sub load_config {
+    my $json = from_json(slurp('config.json'));
+    return $json;
 }
 
-sub load_entry_mapping {
-    my $json = from_json(slurp('entry_map.json'));
-    return $json;
+sub get_apikey {
+    my $config = shift;
+    return $config->{'secrets'}{'redmine'};
+}
+
+sub load_entry_map {
+    my $config = shift;
+    return $config->{'entry_map'};
 }
 
 sub load_issue_map {
-    my $json = from_json(slurp('issue_map.json'));
-    return $json;
+    my $config = shift;
+    return $config->{'issue_map'};
 }
 
 sub logger {

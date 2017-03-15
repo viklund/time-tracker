@@ -1,0 +1,15 @@
+{
+    "entry_map": {
+        "task": 0,
+        "activity": 1,
+        "comment": 2
+    },
+    "issue_map": {
+        "Project1":  2,
+        "Project2":  9
+    },
+    "secrets": {
+        "redmine": "my-redmine-token",
+        "toggl": "my-toggle-token"
+    }
+}
