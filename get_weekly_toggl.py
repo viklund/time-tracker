@@ -5,6 +5,7 @@ import base64
 import sys
 import datetime
 from os.path import isfile
+import argparse
 
 toggl_username = json.load(open('config.json'))['secrets']['toggl']
 
@@ -100,8 +101,16 @@ def friday_of(dt):
     return dt + datetime.timedelta(days=(4 - dt.weekday()))
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Retrieve data from toggl')
+    parser.add_argument('--from', type=int, dest='frm', action='store', required=True, metavar='FROM',
+            help='Delta week to start from (0 is current week)')
+    parser.add_argument('--to', type=int, required=True,
+            help='Delta week to go until')
+
+    args = parser.parse_args()
+
     now = datetime.datetime.now(TZ())
-    for delta in [0,1,2,3]:
+    for delta in range(args.frm, args.to+1):
         check_time = now - datetime.timedelta(days=7*delta)
         friday = friday_of(check_time).strftime("%Y-%m-%d")
 
