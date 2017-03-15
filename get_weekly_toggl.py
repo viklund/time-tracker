@@ -56,23 +56,8 @@ def get_project_info(pid):
 
 
 def check_week_of(day):
-    # myformat = '%Y-%m-%d'
-    # print 'day: ' + day.strftime(myformat)
-    # print 'days: ' + str(day.weekday())
-    
-    # monday = day - datetime.timedelta(
-    #             days=day.weekday(),
-    #             microseconds=day.microsecond,
-    #             hours=day.hour)
-    # friday = monday + datetime.timedelta(
-    #         days = 4)
-    # 
-    # url = "https://www.toggl.com/api/v8/time_entries?start_date=%s&end_date=%s" % (
-    #         urllib2.quote(monday.isoformat()),
-    #         urllib2.quote(friday.isoformat()))
-
     saturday = day - datetime.timedelta(
-                days=day.weekday() + 2, # + 2 # is this the place to add two days to get to saturday?
+                days=day.weekday() + 2, # Saturday
                 microseconds=day.microsecond,
                 hours=day.hour)
     friday = saturday + datetime.timedelta(
@@ -80,16 +65,9 @@ def check_week_of(day):
     url = "https://www.toggl.com/api/v8/time_entries?start_date=%s&end_date=%s" % (
             urllib2.quote(saturday.isoformat()),
             urllib2.quote(friday.isoformat()))
-    
-    # print url
+
     data = get_response(url)
 
-    #dump(data)
-
-    ## Prev data structure
-    ## sums["client:projname:entry descr"] = total time
-    ## 
-    ## New:
     ## sums["client:projname:entry descr:tag"] = total time
     sums = {}
     for entry in data:

@@ -58,8 +58,6 @@ for my $week (@$json) {
             next;
         }
 
-        # my structure has a 4th element that contains the tag content 
-        # from Toggl 
         my $comment = (split /:/, $entry)[3];
         if ($comment eq 'None') { $comment = ''; }
 
@@ -136,14 +134,12 @@ sub run_rmclient_insert {
     close($CMD);
     return $exitcode;
 }
-        
 
 
 sub get_issue_of {
     my $entry = shift;
-    # my structure has a 4th element that contains the tag content 
-    # from Toggl 
-    my ($proj, $task, $activity, $tag) = split /:/, $entry;    
+
+    my ($proj, $task, $activity, $tag) = split /:/, $entry;
     if (exists $issue_of{ $task } ) {
         my $issue = $issue_of{$task};
         if ( ! exists $activity_id_of{ $activity } ) {
