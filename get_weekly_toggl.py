@@ -59,10 +59,11 @@ def get_project_info(pid):
 def check_week_of(day):
     saturday = day - datetime.timedelta(
                 days=day.weekday() + 2, # Saturday
-                microseconds=day.microsecond,
-                hours=day.hour)
+                minutes=day.minute,
+                seconds=day.second,
+                hours=day.hour) # saturday 00:00:00
     friday = saturday + datetime.timedelta(
-            days = 6)
+            days = 7) # changed to 7 to set the end date to midnight Saturday 
     url = "https://www.toggl.com/api/v8/time_entries?start_date=%s&end_date=%s" % (
             urllib2.quote(saturday.isoformat()),
             urllib2.quote(friday.isoformat()))
