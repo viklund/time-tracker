@@ -45,7 +45,7 @@ fields. For efficiency reasons the toggl fields are referenced using an
 index, from 0 to 4 according to this:
 
     0: client
-    1: name
+    1: project
     2: description
     3: tag
 
