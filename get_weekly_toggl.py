@@ -1,10 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 import json
 import urllib2
 import base64
 import sys
 import datetime
 from os.path import isfile
+import os
 import argparse
 
 toggl_username = json.load(open('config.json'))['secrets']['toggl']
@@ -71,24 +72,35 @@ def check_week_of(day):
     data = get_response(url)
 
     ## sums["client:projname:entry descr:tag"] = total time
-    sums = {}
+    entries = {}
     for entry in data:
+        myentry = {
+                'client': 'None',
+                'project': 'None',
+                'description': '',
+                'tag': '',
+                'duration': 0,
+        }
         if entry['duration'] == 0:
             continue
-        tag = 'None'
         if entry.has_key('tags'):
-            tag = ' / '.join(entry['tags'])
+            myentry['tag'] = ' / '.join(entry['tags'])
         if entry.has_key('pid'):
-            project = get_project_info(entry['pid'])
-            desc = "%s:%s:%s:%s" % ( project['client'], project['name'], entry.get('description', ""), tag )
-        else:
-            desc = "None:None:%s:%s" % ( entry.get('description',""), tag )
-        if not sums.has_key(desc):
-            sums[desc] = 0.0
+            project =  get_project_info(entry['pid'])
+            myentry['project'] = project['name']
+            myentry['client'] = project['client']
+            myentry['description'] = entry.get('description','')
         if entry['duration'] > 0:
-            sums[desc] += entry['duration']/3600.0
+            myentry['duration'] = entry['duration']/3600.0
+        hash = ':'.join( [ myentry[k] for k in ['client', 'project', 'description', 'tag'] ] )
 
-    return sums
+        if entries.has_key(hash):
+            entries[hash]['duration'] += myentry['duration']
+        else:
+            entries[hash] = myentry
+
+
+    return entries
 
 def dump(data):
     print(json.dumps(data, sort_keys=True, indent=4,
@@ -110,6 +122,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    try:
+        os.stat('json')
+    except:
+        os.mkdir('json')
+
     now = datetime.datetime.now(TZ())
     for delta in range(args.frm, args.to+1):
         check_time = now - datetime.timedelta(days=7*delta)
@@ -118,15 +135,15 @@ if __name__ == '__main__':
         outfile = 'json/info_{}.json'.format(friday)
 
         if isfile(outfile):
-            print "We already have checked {}, skipping".format(friday)
+            print("We already have checked {}, skipping".format(friday))
             continue
 
-        print "Processing {}".format(friday)
+        print("Processing {}".format(friday))
 
         hours = check_week_of(check_time)
         sum = 0
-        for hour in hours.values():
-            sum += hour
+        for entry in hours.values():
+            sum += entry['duration']
         info = {
             "week": friday,
             "sum": sum,

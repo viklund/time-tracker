@@ -8,7 +8,9 @@ Just the core modules.
 
 ### Ruby
 
-Everything needed is included in the repo (I hope)
+```bash
+gem install rmclient
+```
 
 ### Perl
 
@@ -26,7 +28,6 @@ cpan DateTime JSON
 ```bash
 git clone git@github.com:viklund/time-tracker.git
 cd time-tracker
-git submodule update --init
 ```
 
 ## Configure the json file
@@ -62,13 +63,8 @@ into redmine. For this you use the `entry_map` and `issue_map` fields in the
 #### Entry map
 
 The entry map is used to map the 4 different toggl fields into the redmine
-fields. For efficiency reasons the toggl fields are referenced using an
-index, from 0 to 4 according to this:
-
-    0: client
-    1: project
-    2: description
-    3: tag
+fields. The keys should be the redmine fields and the values are the names of
+the toggl fields.
 
 I use the client field to identify issue number, project to identify type of
 activity and the comment field to specify a short comment on what I'm doing
@@ -77,10 +73,10 @@ So in my case the entry map looks like this:
 
 ```json
     "entry_map": {
-        "task": 0,
-        "activity": 1,
-        "comment": 2
-    }
+        "task": "client",
+        "activity": "project",
+        "comment": "description"
+    },
 ```
 
 #### Issue map
@@ -166,5 +162,4 @@ $ ./log_in_redmine.pl --insert json/info_2017-10-06.json
 # TODO
 
 * Make a docker container of everything for ease of use
-* Better activity mapping
 * The from/to specification for the python script is very illogical.

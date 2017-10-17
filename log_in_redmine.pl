@@ -26,10 +26,10 @@ my $config = load_config();
 
 my $apikey = $config->{'secrets'}{'redmine'};
 my $redmine_url = 'https://projects.bils.se';
-my $rmclient = 'rmclient.git/bin/rmclient';
+my $rmclient = 'rmclient';
 
 my %issue_of = %{ $config->{issue_map} };
-my %entry_mapping = %{ $config->{entry_map} };
+our %entry_mapping = %{ $config->{entry_map} };
 
 my %activity_id_of = (
     Design                  =>  8,
@@ -54,15 +54,17 @@ my $tot_time = 0;
 
 for my $week (@$json) {
     my $dt = $week->{'week'};
-    for my $entry ( keys %{ $week->{'work'} } ) {
-        my ($issue, $activity) = get_issue_of( $entry );
+    for my $entry ( values %{ $week->{'work'} } ) {
+        my $issue = get_issue_of( $entry );
         if ( ! $issue ) {
             $error = 1;
             next;
         }
 
-        my $comment = (split /:/, $entry)[$entry_mapping{comment}];
+        my $comment = $entry->{ $entry_mapping{comment} };
         if ($comment eq 'None') { $comment = ''; }
+
+        my $activity_id = $activity_id_of{ $entry->{ $entry_mapping{activity} } };
 
         my $issue_title = issue_lookup($issue);
         if ( ! $issue_title ) {
@@ -72,10 +74,10 @@ for my $week (@$json) {
 
         my %data = (
             issue    => $issue,
-            activity => $activity,
-            activity_text => $activity_of_id{$activity},
+            activity => $activity_id,
+            activity_text => $activity_of_id{$activity_id},
             dt       => $dt,
-            time     => $week->{'work'}{$entry},
+            time     => $entry->{duration},
             comment  => $comment,
             entry    => $entry,
             title    => $issue_title,
@@ -106,8 +108,8 @@ for my $entry ( @ok_entries ) {
 
     $tot_time += $entry->{time};
 
-    printf "%-5d Logging %5.2fh of %40.40s as <%20s> (%2d) on <%30.30s> (\"%s\")\n",
-        $entry->{issue}, $entry->{time}, $entry->{entry},
+    printf "%-5d Logging %5.2fh of <%20s> (%2d) on <%30.30s> (\"%s\")\n",
+        $entry->{issue}, $entry->{time},
         $entry->{activity_text}, $entry->{activity},
         $entry->{title}, $entry->{comment};
 
@@ -141,17 +143,12 @@ sub run_rmclient_insert {
 
 sub get_issue_of {
     my $entry = shift;
-    my @entry = split /:/, $entry;
-    my ($task, $activity) = @entry[ @entry_mapping{qw/ task activity /} ];
+    my $task = $entry->{ $entry_mapping{task} };
+
 
     if (exists $issue_of{ $task } ) {
         my $issue = $issue_of{$task};
-        if ( ! exists $activity_id_of{ $activity } ) {
-            warn "Can't find activity id for <$activity>\n";
-            return;
-        }
-
-        return ($issue, $activity_id_of{ $activity });
+        return $issue;
     }
     warn "Can't find an entry for $entry\n";
     return;

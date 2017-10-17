@@ -1,8 +1,8 @@
 {
     "entry_map": {
-        "task": 0,
-        "activity": 1,
-        "comment": 2
+        "task": "client",
+        "activity": "project",
+        "comment": "description"
     },
     "issue_map": {
         "Project1":  2,
