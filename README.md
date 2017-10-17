@@ -1,8 +1,29 @@
 # Sync toggl timings into NBIS redmine system
 
+## Prerequisites
+
+### Python 2.7
+
+Just the core modules.
+
+### Ruby
+
+Everything needed is included in the repo (I hope)
+
+### Perl
+
+The following modules need to be installed, for example with `cpan`.
+
+    DateTime
+    JSON
+
+```bash
+cpan DateTime JSON
+```
+
 ## Initialize the code
 
-```
+```bash
 git clone git@github.com:viklund/time-tracker.git
 cd time-tracker
 git submodule update --init
@@ -140,3 +161,10 @@ When that seems to work ok, you can run the script with `--insert`:
 ```bash
 $ ./log_in_redmine.pl --insert json/info_2017-10-06.json
 ```
+
+
+# TODO
+
+* Make a docker container of everything for ease of use
+* Better activity mapping
+* The from/to specification for the python script is very illogical.
