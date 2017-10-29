@@ -43,6 +43,7 @@ my %activity_id_of = (
     Admin                   => 18,
     Absence                 => 19,
     "Core Facility Support" => 20,
+    "Consultation"          => 33,
 );
 
 my %activity_of_id = map { ($activity_id_of{$_}, $_) } keys %activity_id_of;
