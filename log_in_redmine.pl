@@ -25,7 +25,7 @@ if ( ref($json) ne "ARRAY" ) {
 my $config = load_config();
 
 my $apikey = $config->{'secrets'}{'redmine'};
-my $redmine_url = 'https://projects.bils.se';
+my $redmine_url = 'https://projects.nbis.se';
 my $rmclient = 'rmclient';
 
 my %issue_of = %{ $config->{issue_map} };
