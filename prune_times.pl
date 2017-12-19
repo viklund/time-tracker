@@ -14,9 +14,6 @@ use JSON qw( from_json to_json );
 my $file = shift // die "Need input file\n";
 
 (my $outfile = $file) =~ s/(.+)\.(.+)/$1_pruned.$2/;
-print $file . "\n";
-print $outfile . "\n";
-
 open OF, ">$outfile" or die;
 
 my $json = from_json(slurp($file));
@@ -25,9 +22,15 @@ if ( ref($json) ne "ARRAY" ) {
     $json = [ $json ];
 }
 
-my $paskanakki = "Infrastructure:NBIS General:Admin:"; # https://translate.google.se/?source=osdd#auto/en/paskanakki
-my $roundoff_tally = 0;
+my $accumulated_time_file = "accumulated_time.txt";
+my $at = slurp($accumulated_time_file);
+chomp($at);
+print STDERR "accumulated time: $at\n";
+# my $roundoff_tally = 0;
+my $roundoff_tally = $at;
+
 my $rounded_sum = 0;
+my $paskanakki = "Infrastructure:NBIS General:Admin:"; # https://translate.google.se/?source=osdd#auto/en/paskanakki
 
 for my $week (@$json) {
     while (my ($key, $entry) = each ($week->{'work'}) ) {
@@ -77,6 +80,10 @@ for my $week (@$json) {
 
 print OF to_json(@$json[0]) . "\n";
 close OF;
+
+open AT, ">$accumulated_time_file";
+print AT $roundoff_tally;
+close AT;
 
 sub slurp {
     my $file = shift;
