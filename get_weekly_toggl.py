@@ -113,12 +113,23 @@ def dump_file(data, file):
 def friday_of(dt):
     return dt + datetime.timedelta(days=(4 - dt.weekday()))
 
+def get_delta(timepoint):
+    tests = [ lambda x: int(timepoint),
+              lambda x: (datetime.datetime.now() - datetime.datetime.strptime(timepoint, "%Y-%m-%d")).days / 7 + 1 ]
+    for t in tests:
+        try:
+            result = t(args)
+            return result
+        except ValueError:
+            pass
+
+    raise Exception("Value should be either a date or a number of weeks")
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Retrieve data from toggl')
-    parser.add_argument('--from', type=int, dest='frm', action='store', required=True, metavar='FROM',
-            help='Delta week to start from (0 is current week)')
-    parser.add_argument('--to', type=int, required=True,
-            help='Delta week to go until')
+    parser.add_argument('--start', type=str, help='Start point to sync from, either number of weeks back or a date')
+    parser.add_argument('--end', type=str, help='End point of sync interval', default=0)
 
     args = parser.parse_args()
 
@@ -127,8 +138,12 @@ if __name__ == '__main__':
     except:
         os.mkdir('json')
 
+    start = get_delta(args.start)
+    end   = get_delta(args.end)
+
     now = datetime.datetime.now(TZ())
-    for delta in range(args.frm, args.to+1):
+
+    for delta in range(end, start):
         check_time = now - datetime.timedelta(days=7*delta)
         friday = friday_of(check_time).strftime("%Y-%m-%d")
 

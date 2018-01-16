@@ -11,8 +11,10 @@ use JSON qw( from_json to_json );
 
 
 my $insert = '';
+my $check = '';
 GetOptions(
     'insert' => \$insert,
+    'check'  => \$check,
 ) or die "Could not parse options\n";
 
 my $file = shift // die "Need input file\n";
@@ -89,7 +91,11 @@ for my $week (@$json) {
 }
 
 
-#exit if $error;
+if ( $error ) {
+    say STDERR "Errors in file $file";
+    exit 1;
+}
+exit 0 if $check;
 
 @ok_entries = sort { $a->{issue} <=> $b->{issue} ||
              $a->{activity_text} cmp $b->{activity_text}
