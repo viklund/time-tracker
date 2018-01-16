@@ -113,9 +113,12 @@ def dump_file(data, file):
 def friday_of(dt):
     return dt + datetime.timedelta(days=(4 - dt.weekday()))
 
+def sunday_of(dt):
+    return dt + datetime.timedelta(days=(6 - dt.weekday()))
+
 def get_delta(timepoint):
     tests = [ lambda x: int(timepoint),
-              lambda x: (datetime.datetime.now() - datetime.datetime.strptime(timepoint, "%Y-%m-%d")).days / 7 + 1 ]
+              lambda x: (sunday_of(datetime.datetime.now()) - datetime.datetime.strptime(timepoint, "%Y-%m-%d")).days / 7 ]
     for t in tests:
         try:
             result = t(args)
@@ -143,7 +146,7 @@ if __name__ == '__main__':
 
     now = datetime.datetime.now(TZ())
 
-    for delta in range(end, start):
+    for delta in range(end, start+1):
         check_time = now - datetime.timedelta(days=7*delta)
         friday = friday_of(check_time).strftime("%Y-%m-%d")
 
