@@ -117,22 +117,32 @@ the available categories are:
 
 ### Fetch information from toggl
 
-The `get_weekly_toggls.py` has two command line options options, `--from` and
-`--to` which are used to specify how far back you want to go. From is how many
-weeks ago you should start fetching things and to is how many weeks ago you
-should stop, working backwards (hrmmm). The scripts stores the results in a
-subdirectory called `json` which one file per week.
+The `get_weekly_toggls.py` has two command line options options, `--start` and
+`--end` which are used to specify how far back you want to go.
 
-This will fetch last weeks work:
+Both are either a date or the number of weeks to go back. If sepcified as a
+date, the script will take the week that has that date in it as starting or end
+point (the script never works with partial weeks).
+
+This will fetch the last weeks work:
 
 ```bash
-$ ./get_weekly_toggl.py --from 1 --to 1
+$ ./get_weekly_toggl.py --start 1 --end 1
 ```
 
 This will fetch the last 3 weeks work:
 
 ```bash
-$ ./get_weekly_toggl.py --from 1 --to 3
+$ ./get_weekly_toggl.py --start 3 --end 1
+```
+
+This will fetch four weeks of work, the weeks with fridays on:
+    - 2017-10-20
+    - 2017-10-27
+    - 2017-11-03
+
+```bash
+$ ./get_weekly_toggl.py --start 2017-10-18 --end 2017-11-01
 ```
 
 ### Quality control of the files
@@ -162,4 +172,3 @@ $ ./log_in_redmine.pl --insert json/info_2017-10-06.json
 # TODO
 
 * Make a docker container of everything for ease of use
-* The from/to specification for the python script is very illogical.
