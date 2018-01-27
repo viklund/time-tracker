@@ -87,7 +87,7 @@ close AT;
 
 sub slurp {
     my $file = shift;
-    open my $F, '<', $file or die;
+    open my $F, '<', $file or die "Couldn't open $file\n";
     local $/ = '';
     my $data = <$F>;
     return $data;
