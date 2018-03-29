@@ -157,7 +157,8 @@ sub get_issue_of {
         my $issue = $issue_of{$task};
         return $issue;
     }
-    warn "Can't find an entry for $entry\n";
+    warn "Can't find an entry for:\n";
+    say STDERR to_json( $entry );
     return;
 }
 
