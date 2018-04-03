@@ -33,7 +33,7 @@ my $rounded_sum = 0;
 my $paskanakki = "Infrastructure:NBIS General:Admin:"; # https://translate.google.se/?source=osdd#auto/en/paskanakki
 
 for my $week (@$json) {
-    while (my ($key, $entry) = each ($week->{'work'}) ) {
+    while (my ($key, $entry) = each %{$week->{'work'}} ) {
       my $dur = $entry->{'duration'};
       my $hour_int = int($dur);
       my $tail = $dur - $hour_int;
