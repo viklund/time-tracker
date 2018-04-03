@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use POSIX;
+use POSIX qw(floor);
 
 use feature qw( :5.18 );
 
