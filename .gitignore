@@ -1,2 +1,4 @@
 json/
 config.json
+accumulated_time.txt
+*.bk
