@@ -14,7 +14,7 @@ use JSON qw( from_json to_json );
 my $file = shift // die "Need input file\n";
 
 my $outfile = $file =~ s/(.+)\.(.+)/$1_pruned.$2/r;
-open OF, ">$outfile" or die;
+open my $OF, '>', $outfile or die;
 
 my $json = from_json(slurp($file));
 
@@ -78,12 +78,12 @@ for my $week (@$json) {
     $week->{'rounded_sum'} = $rounded_sum;
 }
 
-print OF to_json(@$json[0]) . "\n";
-close OF;
+print $OF to_json(@$json[0]) . "\n";
+close $OF;
 
-open AT, ">$accumulated_time_file";
-print AT $roundoff_tally;
-close AT;
+open my $AT, '>', $accumulated_time_file;
+print $AT $roundoff_tally;
+close $AT;
 
 sub slurp {
     my $file = shift;
