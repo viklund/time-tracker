@@ -34,45 +34,45 @@ my $paskanakki = "Infrastructure:NBIS General:Admin:"; # https://translate.googl
 
 for my $week (@$json) {
     while (my ($key, $entry) = each %{$week->{'work'}} ) {
-      my $dur = $entry->{'duration'};
-      my $hour_int = int($dur);
-      my $tail = $dur - $hour_int;
+        my $dur = $entry->{'duration'};
+        my $hour_int = int($dur);
+        my $tail = $dur - $hour_int;
 
-      my $rounded;
-      if ($tail < 0.33) {
-        $rounded = floor($dur);
-        $roundoff_tally += $tail;
-      } elsif ($tail < 0.5) {
-        $rounded = floor($dur) + 0.5;
-        $roundoff_tally -= 0.5 - $tail;
-      } elsif ($tail < 0.83) {
-        $rounded = floor($dur) + 0.5;
-        $roundoff_tally += $tail - 0.5;
-      } else {
-        $rounded = ceil($dur);
-        $roundoff_tally -= 1.0 - $tail;
-      }
+        my $rounded;
+        if ($tail < 0.33) {
+            $rounded = floor($dur);
+            $roundoff_tally += $tail;
+        } elsif ($tail < 0.5) {
+            $rounded = floor($dur) + 0.5;
+            $roundoff_tally -= 0.5 - $tail;
+        } elsif ($tail < 0.83) {
+            $rounded = floor($dur) + 0.5;
+            $roundoff_tally += $tail - 0.5;
+        } else {
+            $rounded = ceil($dur);
+            $roundoff_tally -= 1.0 - $tail;
+        }
 
-      if($rounded == 0) {
-        delete $week->{'work'}->{$key};
-        print STDERR "Deleted $key: $dur\n";
-      }
-      $entry->{'duration'} = $rounded;
-      $rounded_sum += $rounded;
-      print STDERR "$key: $dur; rounded: $rounded; tally: $roundoff_tally\n";
+        if($rounded == 0) {
+            delete $week->{'work'}->{$key};
+            print STDERR "Deleted $key: $dur\n";
+        }
+        $entry->{'duration'} = $rounded;
+        $rounded_sum += $rounded;
+        print STDERR "$key: $dur; rounded: $rounded; tally: $roundoff_tally\n";
     }
     while (abs($roundoff_tally) > 0.5) {
-      if ($roundoff_tally >0) {
-        $week->{'work'}->{$paskanakki}->{'duration'} += 0.5;
-        $rounded_sum += 0.5;
-        $roundoff_tally -= 0.5;
-        print STDERR "Added 0.5 to $paskanakki\n";
-      } else {
-        $week->{'work'}->{$paskanakki}->{'duration'} -= 0.5;
-        $rounded_sum -= 0.5;
-        $roundoff_tally += 0.5;
-        print STDERR "Subtrackted 0.5 from $paskanakki\n";
-      }
+        if ($roundoff_tally >0) {
+            $week->{'work'}->{$paskanakki}->{'duration'} += 0.5;
+            $rounded_sum += 0.5;
+            $roundoff_tally -= 0.5;
+            print STDERR "Added 0.5 to $paskanakki\n";
+        } else {
+            $week->{'work'}->{$paskanakki}->{'duration'} -= 0.5;
+            $rounded_sum -= 0.5;
+            $roundoff_tally += 0.5;
+            print STDERR "Subtrackted 0.5 from $paskanakki\n";
+        }
     }
 
     $week->{'rounded_sum'} = $rounded_sum;
