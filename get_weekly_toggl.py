@@ -131,8 +131,8 @@ def get_delta(timepoint):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Retrieve data from toggl')
-    parser.add_argument('--start', type=str, help='Start point to sync from, either number of weeks back or a date')
-    parser.add_argument('--end', type=str, help='End point of sync interval', default=0)
+    parser.add_argument('--start', type=str, help='Start point to sync from, either number of weeks back or a date', default=1)
+    parser.add_argument('--end', type=str, help='End point of sync interval', default=1)
 
     args = parser.parse_args()
 
