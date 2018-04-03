@@ -13,7 +13,7 @@ use JSON qw( from_json to_json );
 
 my $file = shift // die "Need input file\n";
 
-(my $outfile = $file) =~ s/(.+)\.(.+)/$1_pruned.$2/;
+my $outfile = $file =~ s/(.+)\.(.+)/$1_pruned.$2/r;
 open OF, ">$outfile" or die;
 
 my $json = from_json(slurp($file));
