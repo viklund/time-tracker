@@ -31,7 +31,7 @@ if ( -f $accumulated_time_file ) {
     $at = slurp($accumulated_time_file);
     chomp($at);
 }
-print STDERR "accumulated time: $at\n";
+printf STDERR "Accumulated time: %4.1f\n", $at;
 # my $roundoff_tally = 0;
 my $roundoff_tally = $at;
 
@@ -39,9 +39,8 @@ my $rounded_sum = 0;
 
 for my $week (@$json) {
     while (my ($key, $entry) = each %{$week->{'work'}} ) {
-        my $dur = $entry->{'duration'};
-        my $hour_int = int($dur);
-        my $tail = $dur - $hour_int;
+        my $dur  = $entry->{'duration'};
+        my $tail = $dur - int( $dur );
 
         my $rounded;
         if ($tail < 0.33) {
@@ -58,9 +57,11 @@ for my $week (@$json) {
             $roundoff_tally -= 1.0 - $tail;
         }
 
-        delete $week->{'work'}{$key} if $rounded == 0;
         $entry->{'duration'} = $rounded;
+        delete $week->{'work'}{$key} if $rounded == 0;
+
         $rounded_sum += $rounded;
+
         printf STDERR "%-3s %40s: %6.2f; rounded: %6.2f; tally: %6.2f\n",
             ($rounded == 0 ? 'DEL' : ''), $key, $dur, $rounded, $roundoff_tally;
     }
@@ -79,7 +80,7 @@ for my $week (@$json) {
     $rounded_sum                         += $addition;
     $roundoff_tally                      -= $addition;
 
-    printf STDERR "Added %3.1f to $paskanakki\n", $addition;
+    printf STDERR "Added %3.1f to %s\n", $addition, $paskanakki;
 
     $week->{'rounded_sum'} = $rounded_sum;
 }
