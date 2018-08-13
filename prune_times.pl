@@ -22,9 +22,12 @@ if ( ref($json) ne "ARRAY" ) {
     $json = [ $json ];
 }
 
+my $at = 0;
 my $accumulated_time_file = "accumulated_time.txt";
-my $at = slurp($accumulated_time_file);
-chomp($at);
+if ( -f $accumulated_time_file ) {
+    $at = slurp($accumulated_time_file);
+    chomp($at);
+}
 print STDERR "accumulated time: $at\n";
 # my $roundoff_tally = 0;
 my $roundoff_tally = $at;
