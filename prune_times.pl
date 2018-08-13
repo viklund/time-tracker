@@ -58,13 +58,11 @@ for my $week (@$json) {
             $roundoff_tally -= 1.0 - $tail;
         }
 
-        if($rounded == 0) {
-            delete $week->{'work'}->{$key};
-            print STDERR "Deleted $key: $dur\n";
-        }
+        delete $week->{'work'}{$key} if $rounded == 0;
         $entry->{'duration'} = $rounded;
         $rounded_sum += $rounded;
-        print STDERR "$key: $dur; rounded: $rounded; tally: $roundoff_tally\n";
+        printf STDERR "%-3s %40s: %6.2f; rounded: %6.2f; tally: %6.2f\n",
+            ($rounded == 0 ? 'DEL' : ''), $key, $dur, $rounded, $roundoff_tally;
     }
 
     # Number of halfhours left, will be negative if we overcommit
