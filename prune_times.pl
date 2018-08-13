@@ -70,6 +70,12 @@ for my $week (@$json) {
     my $addition = $half_hours_left * 0.5;
 
     $week->{work}{$paskanakki}{duration} += $addition;
+
+    # Don't log negative times, move to next week.
+    if ( $week->{work}{$paskanakki}{duration} < 0 ) {
+        $addition -= $week->{work}{$paskanakki}{duration};
+        $week->{work}{$paskanakki}{duration} = 0;
+    }
     $rounded_sum                         += $addition;
     $roundoff_tally                      -= $addition;
 
