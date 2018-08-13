@@ -10,6 +10,10 @@ use DateTime;
 
 use JSON qw( from_json to_json );
 
+my $config = load_config();
+
+my $accumulated_time_file = $config->{prune_times}{accumulated_time_file};
+my $paskanakki = $config->{prune_times}{paskanakki}; # https://translate.google.se/?source=osdd#auto/en/paskanakki
 
 my $file = shift // die "Need input file\n";
 
@@ -23,7 +27,6 @@ if ( ref($json) ne "ARRAY" ) {
 }
 
 my $at = 0;
-my $accumulated_time_file = "accumulated_time.txt";
 if ( -f $accumulated_time_file ) {
     $at = slurp($accumulated_time_file);
     chomp($at);
@@ -33,7 +36,6 @@ print STDERR "accumulated time: $at\n";
 my $roundoff_tally = $at;
 
 my $rounded_sum = 0;
-my $paskanakki = "Infrastructure:NBIS General:Admin:"; # https://translate.google.se/?source=osdd#auto/en/paskanakki
 
 for my $week (@$json) {
     while (my ($key, $entry) = each %{$week->{'work'}} ) {
@@ -91,4 +93,9 @@ sub slurp {
     local $/ = '';
     my $data = <$F>;
     return $data;
+}
+
+sub load_config {
+    my $json = from_json(slurp('config.json'));
+    return $json;
 }
