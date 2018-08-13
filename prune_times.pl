@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use POSIX qw(floor);
+use POSIX qw(floor ceil);
 
 use feature qw( :5.18 );
 
