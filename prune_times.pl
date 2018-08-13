@@ -64,19 +64,16 @@ for my $week (@$json) {
         $rounded_sum += $rounded;
         print STDERR "$key: $dur; rounded: $rounded; tally: $roundoff_tally\n";
     }
-    while (abs($roundoff_tally) > 0.5) {
-        if ($roundoff_tally >0) {
-            $week->{'work'}->{$paskanakki}->{'duration'} += 0.5;
-            $rounded_sum += 0.5;
-            $roundoff_tally -= 0.5;
-            print STDERR "Added 0.5 to $paskanakki\n";
-        } else {
-            $week->{'work'}->{$paskanakki}->{'duration'} -= 0.5;
-            $rounded_sum -= 0.5;
-            $roundoff_tally += 0.5;
-            print STDERR "Subtrackted 0.5 from $paskanakki\n";
-        }
-    }
+
+    # Number of halfhours left, will be negative if we overcommit
+    my $half_hours_left = floor( abs($roundoff_tally / 0.5 ) ) * ($roundoff_tally > 0 ? 1 : -1);
+    my $addition = $half_hours_left * 0.5;
+
+    $week->{work}{$paskanakki}{duration} += $addition;
+    $rounded_sum                         += $addition;
+    $roundoff_tally                      -= $addition;
+
+    printf STDERR "Added %3.1f to $paskanakki\n", $addition;
 
     $week->{'rounded_sum'} = $rounded_sum;
 }
