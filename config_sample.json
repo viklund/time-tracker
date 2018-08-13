@@ -11,5 +11,8 @@
     "secrets": {
         "redmine": "my-redmine-token",
         "toggl": "my-toggle-token"
-    }
+    },
+    "prune_times": {
+        "accumulated_time": "accumulated_time.txt",
+        "paskanakki": "Infrastructure:NBIS General:Admin:"
 }

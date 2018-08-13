@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use POSIX qw(floor);
+use POSIX qw(floor ceil);
 
 use feature qw( :5.18 );
 
@@ -10,6 +10,10 @@ use DateTime;
 
 use JSON qw( from_json to_json );
 
+my $config = load_config();
+
+my $accumulated_time_file = $config->{prune_times}{accumulated_time_file};
+my $paskanakki = $config->{prune_times}{paskanakki}; # https://translate.google.se/?source=osdd#auto/en/paskanakki
 
 my $file = shift // die "Need input file\n";
 
@@ -22,15 +26,16 @@ if ( ref($json) ne "ARRAY" ) {
     $json = [ $json ];
 }
 
-my $accumulated_time_file = "accumulated_time.txt";
-my $at = slurp($accumulated_time_file);
-chomp($at);
+my $at = 0;
+if ( -f $accumulated_time_file ) {
+    $at = slurp($accumulated_time_file);
+    chomp($at);
+}
 print STDERR "accumulated time: $at\n";
 # my $roundoff_tally = 0;
 my $roundoff_tally = $at;
 
 my $rounded_sum = 0;
-my $paskanakki = "Infrastructure:NBIS General:Admin:"; # https://translate.google.se/?source=osdd#auto/en/paskanakki
 
 for my $week (@$json) {
     while (my ($key, $entry) = each %{$week->{'work'}} ) {
@@ -53,27 +58,28 @@ for my $week (@$json) {
             $roundoff_tally -= 1.0 - $tail;
         }
 
-        if($rounded == 0) {
-            delete $week->{'work'}->{$key};
-            print STDERR "Deleted $key: $dur\n";
-        }
+        delete $week->{'work'}{$key} if $rounded == 0;
         $entry->{'duration'} = $rounded;
         $rounded_sum += $rounded;
-        print STDERR "$key: $dur; rounded: $rounded; tally: $roundoff_tally\n";
+        printf STDERR "%-3s %40s: %6.2f; rounded: %6.2f; tally: %6.2f\n",
+            ($rounded == 0 ? 'DEL' : ''), $key, $dur, $rounded, $roundoff_tally;
     }
-    while (abs($roundoff_tally) > 0.5) {
-        if ($roundoff_tally >0) {
-            $week->{'work'}->{$paskanakki}->{'duration'} += 0.5;
-            $rounded_sum += 0.5;
-            $roundoff_tally -= 0.5;
-            print STDERR "Added 0.5 to $paskanakki\n";
-        } else {
-            $week->{'work'}->{$paskanakki}->{'duration'} -= 0.5;
-            $rounded_sum -= 0.5;
-            $roundoff_tally += 0.5;
-            print STDERR "Subtrackted 0.5 from $paskanakki\n";
-        }
+
+    # Number of halfhours left, will be negative if we overcommit
+    my $half_hours_left = floor( abs($roundoff_tally / 0.5 ) ) * ($roundoff_tally > 0 ? 1 : -1);
+    my $addition = $half_hours_left * 0.5;
+
+    $week->{work}{$paskanakki}{duration} += $addition;
+
+    # Don't log negative times, move to next week.
+    if ( $week->{work}{$paskanakki}{duration} < 0 ) {
+        $addition -= $week->{work}{$paskanakki}{duration};
+        $week->{work}{$paskanakki}{duration} = 0;
     }
+    $rounded_sum                         += $addition;
+    $roundoff_tally                      -= $addition;
+
+    printf STDERR "Added %3.1f to $paskanakki\n", $addition;
 
     $week->{'rounded_sum'} = $rounded_sum;
 }
@@ -91,4 +97,9 @@ sub slurp {
     local $/ = '';
     my $data = <$F>;
     return $data;
+}
+
+sub load_config {
+    my $json = from_json(slurp('config.json'));
+    return $json;
 }
