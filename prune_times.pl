@@ -78,7 +78,7 @@ for my $week (@$json) {
     $week->{'rounded_sum'} = $rounded_sum;
 }
 
-print $OF to_json(@$json[0]) . "\n";
+print $OF to_json(@$json[0], {utf8 => 1, pretty => 1}) . "\n";
 close $OF;
 
 open my $AT, '>', $accumulated_time_file;
